@@ -1,0 +1,20 @@
+{
+  "name": "findhusly-clone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^6.20.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
