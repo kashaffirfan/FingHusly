@@ -11,7 +11,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", // your React app’s port (Vite uses 5173)
+    origin: ["http://localhost:5173", "http://localhost:3000"], // your React app’s port (Vite uses 5173)
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
