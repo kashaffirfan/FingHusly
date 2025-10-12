@@ -2,6 +2,7 @@ import React from "react";
 import heroImage from "./assets/hero.jpg"; // 👈 put your image inside src/assets folder
 
 export default function App() {
+  
   return (
     <div className="flex flex-col text-gray-800">
       {/* HERO SECTION (with background) */}

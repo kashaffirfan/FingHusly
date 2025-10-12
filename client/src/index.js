@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"; 
 import "./index.css";
 
 import Home from "./pages/Home";
@@ -9,6 +9,8 @@ import Register from "./pages/Register";
 import ViewDetails from "./pages/ViewDetails";
 import Agents from "./pages/Agents";
 import AddProperty from "./pages/AddProperty";
+import Account from "./pages/Account";
+import PropertyDetails from "./pages/PropertyDetails"; 
 import App from "./App";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -18,11 +20,15 @@ root.render(
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/Login" element={<Navigate to="/login" replace />} />
       <Route path="/home" element={<Home />} />
       <Route path="/register" element={<Register />} />
       <Route path="/view/:id" element={<ViewDetails />} />
-      <Route path="/agents" element={<Agents />} />
+      <Route path="/agent" element={<Agents />} />
+      <Route path="/account" element={<Account />} />
       <Route path="/add-property" element={<AddProperty />} />
+      <Route path="/property/:id" element={<PropertyDetails />} /> 
+      <Route path="/viewdetails/:id" element={<ViewDetails />} />
     </Routes>
   </BrowserRouter>
 );

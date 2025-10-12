@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AddProperty = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: "",
     location: "",
@@ -8,140 +10,129 @@ const AddProperty = () => {
     description: "",
     image: null,
   });
+  const [loading, setLoading] = useState(false);
 
-  const [preview, setPreview] = useState(null);
-
-  // handle input change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // handle image upload
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({ ...prev, image: file }));
-      setPreview(URL.createObjectURL(file));
+    const { name, value, files } = e.target;
+    if (name === "image" && files?.[0]) {
+      setFormData({ ...formData, image: files[0] });
+    } else {
+      setFormData({ ...formData, [name]: value });
     }
   };
 
-  // handle submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Property added:", formData);
-    alert("Property submitted successfully!");
-    // later we’ll send this to backend with FormData()
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (!user) return alert("Agent not found. Please log in.");
+
+    try {
+      setLoading(true);
+
+      const form = new FormData();
+      form.append("title", formData.title);
+      form.append("location", formData.location);
+      form.append("price", formData.price);
+      form.append("description", formData.description);
+      if (formData.image) form.append("image", formData.image);
+      form.append("agent", user._id); // Link property to this agent
+
+      const res = await fetch("http://localhost:5000/api/properties", {
+        method: "POST",
+        body: form,
+      });
+
+      // Check content-type before parsing
+      const contentType = res.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.error("❌ Backend returned non-JSON response:", text);
+        throw new Error("Unexpected response from server");
+      }
+
+      if (!res.ok) throw new Error(data.message || "Failed to add property");
+
+      alert("✅ Property added successfully!");
+      navigate("/agent"); // Go back to agent dashboard
+    } catch (err) {
+      console.error("❌ Error adding property:", err);
+      alert("❌ Failed to add property. Check console for details.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center items-center p-4">
-      <div className="bg-white shadow-lg rounded-2xl p-6 sm:p-10 w-full max-w-3xl">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-          Add New Property
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-lg rounded-lg p-8 w-full max-w-lg"
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center">Add New Property</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Property Title
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="e.g. Spacious Apartment in Lahore"
-              required
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <input
+          type="text"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          placeholder="Property Title"
+          required
+          className="w-full mb-3 p-2 border rounded"
+        />
 
-          {/* Location */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Location
-            </label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location}
-              onChange={handleChange}
-              placeholder="e.g. Bahria Town, Lahore"
-              required
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <input
+          type="text"
+          name="location"
+          value={formData.location}
+          onChange={handleChange}
+          placeholder="Location"
+          required
+          className="w-full mb-3 p-2 border rounded"
+        />
 
-          {/* Price */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Price (PKR)
-            </label>
-            <input
-              type="number"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              placeholder="e.g. 95000"
-              required
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <input
+          type="number"
+          name="price"
+          value={formData.price}
+          onChange={handleChange}
+          placeholder="Price"
+          required
+          className="w-full mb-3 p-2 border rounded"
+        />
 
-          {/* Description */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-1">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Describe the property..."
-              rows="4"
-              required
-              className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          placeholder="Description"
+          rows="4"
+          required
+          className="w-full mb-3 p-2 border rounded"
+        />
 
-          {/* Image Upload */}
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">
-              Upload Image
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4
-                         file:rounded-lg file:border-0
-                         file:text-sm file:font-medium
-                         file:bg-blue-50 file:text-blue-700
-                         hover:file:bg-blue-100"
-            />
-            {preview && (
-              <div className="mt-4">
-                <p className="text-gray-600 text-sm mb-1">Preview:</p>
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="rounded-xl shadow-md w-full max-h-64 object-cover"
-                />
-              </div>
-            )}
-          </div>
+        <input
+          type="file"
+          name="image"
+          accept="image/*"
+          onChange={handleChange}
+          className="w-full mb-4"
+          required
+        />
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-          >
-            Submit Property
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          className={`w-full py-2 rounded text-white ${
+            loading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+          }`}
+          disabled={loading}
+        >
+          {loading ? "Adding..." : "Add Property"}
+        </button>
+      </form>
     </div>
   );
 };

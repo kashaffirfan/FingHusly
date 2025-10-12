@@ -1,94 +1,101 @@
-import React from "react";
-import { Phone, Mail, MapPin } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Agents = () => {
-  const agents = [
-    {
-      id: 1,
-      name: "Ali Khan",
-      role: "Senior Real Estate Agent",
-      phone: "+92 300 1234567",
-      email: "ali.khan@findhusly.com",
-      location: "Bahria Town, Lahore",
-      image:
-        "https://images.unsplash.com/photo-1603415526960-f7e0328d2b86?auto=format&fit=crop&w=400&q=80",
-    },
-    {
-      id: 2,
-      name: "Sara Ahmed",
-      role: "Property Consultant",
-      phone: "+92 322 9876543",
-      email: "sara.ahmed@findhusly.com",
-      location: "Gulberg, Lahore",
-      image:
-        "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=400&q=80",
-    },
-    {
-      id: 3,
-      name: "Usman Malik",
-      role: "Investment Advisor",
-      phone: "+92 345 4567890",
-      email: "usman.malik@findhusly.com",
-      location: "DHA, Karachi",
-      image:
-        "https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=400&q=80",
-    },
-    {
-      id: 4,
-      name: "Ayesha Khan",
-      role: "Luxury Property Specialist",
-      phone: "+92 331 6677889",
-      email: "ayesha.khan@findhusly.com",
-      location: "Islamabad",
-      image:
-        "https://images.unsplash.com/photo-1614289361968-97150f4f4b56?auto=format&fit=crop&w=400&q=80",
-    },
-  ];
+  const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [properties, setProperties] = useState([]);
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (!storedUser) {
+      navigate("/Login");
+      return;
+    }
+    setUser(storedUser);
+
+    // Fetch agent’s properties (optional)
+    fetch(`http://localhost:5000/api/properties/agent/${storedUser._id}`)
+      .then((res) => res.json())
+      .then((data) => setProperties(data))
+      .catch((err) => console.error("Error fetching properties:", err));
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/Login");
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-16 px-4 md:px-12 lg:px-24">
-      <h1 className="text-3xl font-bold text-gray-800 text-center mb-10">
-        Meet Our Professional Agents
-      </h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* ✅ Navbar */}
+      <nav className="bg-white shadow-md py-3 px-6 flex justify-between items-center sticky top-0 z-50">
+        <h1
+          className="text-2xl font-bold text-blue-600 cursor-pointer"
+          onClick={() => navigate("/agent")}
+        >
+          FindHusly
+        </h1>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-        {agents.map((agent) => (
-          <div
-            key={agent.id}
-            className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        <div className="flex items-center space-x-6">
+          <button
+            onClick={() => alert("No new notifications")}
+            className="relative text-gray-600 hover:text-blue-600"
           >
-            <img
-              src={agent.image}
-              alt={agent.name}
-              className="w-full h-56 object-cover"
-            />
-            <div className="p-5">
-              <h2 className="text-xl font-semibold text-gray-800">
-                {agent.name}
-              </h2>
-              <p className="text-sm text-gray-500 mb-3">{agent.role}</p>
+            <span className="material-icons text-2xl">notifications</span>
+          </button>
 
-              <div className="flex items-center text-gray-600 text-sm mb-2">
-                <Phone className="h-4 w-4 mr-2 text-blue-500" />
-                {agent.phone}
+          <button
+            onClick={() => navigate("/account")}
+            className="text-gray-700 hover:text-blue-600 font-medium"
+          >
+            My Account
+          </button>
+
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+          >
+            Logout
+          </button>
+        </div>
+      </nav>
+
+      {/* ✅ Page Content */}
+      <div className="p-6">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800">
+          Welcome, {user?.name || "Agent"}
+        </h2>
+
+        {properties.length === 0 ? (
+          <p className="text-gray-500">No properties listed yet.</p>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6">
+            {properties.map((property) => (
+              <div
+                key={property._id}
+                className="bg-white shadow-lg rounded-lg overflow-hidden hover:shadow-xl transition"
+              >
+                <img
+                  src={`http://localhost:5000/uploads/${property.image}`}
+                  alt={property.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold">{property.title}</h3>
+                  <p className="text-gray-600">{property.location}</p>
+                  <p className="text-blue-600 font-bold mt-2">${property.price}</p>
+                  <button
+                    onClick={() => navigate(`/property/${property._id}`)}
+                    className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                  >
+                    View Details
+                  </button>
+                </div>
               </div>
-
-              <div className="flex items-center text-gray-600 text-sm mb-2">
-                <Mail className="h-4 w-4 mr-2 text-blue-500" />
-                {agent.email}
-              </div>
-
-              <div className="flex items-center text-gray-600 text-sm">
-                <MapPin className="h-4 w-4 mr-2 text-blue-500" />
-                {agent.location}
-              </div>
-
-              <button className="mt-4 w-full bg-blue-600 text-white py-2 rounded-xl hover:bg-blue-700 transition">
-                Contact Agent
-              </button>
-            </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

@@ -1,32 +1,32 @@
 import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
+import connectDB from "./config/mongoConnect.js";
+import path from "path";
+import { fileURLToPath } from "url";
 import propertyRoutes from "./routes/propertyRoutes.js";
 
+
 dotenv.config();
+connectDB();
+// Express app initialization must come before using 'app'
 const app = express();
 
 // Middleware
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"], // your React app’s port (Vite uses 5173)
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
 app.use(express.json());
+app.use(cors());
+
+// Static folder (for uploaded images)
+app.use("/uploads", express.static("uploads"));
 
 // Routes
 app.use("/api/users", userRoutes);
-app.use("/api/properties", propertyRoutes);
+app.use("/api/properties", propertyRoutes); 
 
-// Connect DB
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("✅ MongoDB Connected");
-    app.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));
-  })
-  .catch((err) => console.error("❌ MongoDB connection failed:", err.message));
+
+
+// Port setup
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

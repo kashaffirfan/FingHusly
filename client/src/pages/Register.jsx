@@ -1,50 +1,108 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    contactnumber: "",
     password: "",
-    role: "user",
+    role: "User", // ✅ Default to "User"
   });
-  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
-
     try {
-      const res = await axios.post("http://localhost:5000/api/users/register", formData);
-      console.log("✅ Register Response:", res.data);
-      setMessage("Account created successfully!");
+      const res = await fetch("http://localhost:5000/api/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("Registration successful!");
+        navigate("/login");
+      } else {
+        alert(data.message || "Registration failed");
+      }
     } catch (err) {
-      console.error("❌ Registration error:", err.response?.data || err.message);
-      setMessage("Error creating account.");
+      console.error("Error:", err);
+      alert("Something went wrong.");
     }
   };
 
   return (
-    <div className="register-page">
-      <h2>Create Account</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="text" name="name" placeholder="Name" onChange={handleChange} required />
-        <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
-        <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
-        <select name="role" onChange={handleChange}>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-lg rounded-xl p-8 w-[400px]"
+      >
+        <h2 className="text-2xl font-bold text-center mb-4">Create Account</h2>
+
+        <input
+          type="text"
+          name="name"
+          placeholder="Full Name"
+          value={formData.name}
+          onChange={handleChange}
+          className="w-full p-2 mb-3 border rounded"
+          required
+        />
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email Address"
+          value={formData.email}
+          onChange={handleChange}
+          className="w-full p-2 mb-3 border rounded"
+          required
+        />
+
+        <input
+          type="text"
+          name="contact"
+          placeholder="Contact Number"
+          value={formData.contact}
+          onChange={handleChange}
+          className="w-full p-2 mb-3 border rounded"
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="w-full p-2 mb-3 border rounded"
+          required
+        />
+
+        <select
+          name="role"
+          value={formData.role}
+          onChange={handleChange}
+          className="w-full p-2 mb-4 border rounded"
+        >
           <option value="user">User</option>
           <option value="agent">Agent</option>
         </select>
-        <button type="submit">Register</button>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold p-2 rounded"
+        >
+          Register
+        </button>
       </form>
-      <p>{message}</p>
     </div>
   );
 };
