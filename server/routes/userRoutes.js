@@ -19,7 +19,7 @@ router.put("/profile", protect, updateUserProfile);
 router.put("/profile", protect, upload.single("photo"), updateUserProfile);
 
 // Register & Login
-router.post("/register", registerUser);
+router.post("/register", upload.single("photo"), registerUser);
 router.post("/login", loginUser);
 
 // Other routes

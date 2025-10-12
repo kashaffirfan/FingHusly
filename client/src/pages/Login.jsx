@@ -19,16 +19,17 @@ const Login = () => {
       const { user, token } = res.data;
 
       if (user) {
-  localStorage.setItem("activeUser", JSON.stringify(user));
-  localStorage.setItem("activeToken", token);
-  localStorage.setItem("activeRole", user.role);
+        localStorage.setItem("activeUser", JSON.stringify(user));
+        localStorage.setItem("activeToken", token);
+        localStorage.setItem("activeRole", user.role);
+        const userRole = user?.role?.toLowerCase();
 
-  alert("Login successful!");
-  if (user.role === "User") navigate("/home");
-  else navigate("/agent");
-}
-
-
+        alert("Login successful!");
+        if (userRole === "user") navigate("/home");
+        else {
+          navigate("/agent");
+        }
+      }
     } catch (error) {
       console.error("Login error:", error);
       alert(error.response?.data?.message || "Invalid credentials");
@@ -36,33 +37,81 @@ const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-6 rounded-lg shadow-md w-80"
-      >
-        <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
-        <input
-          type="text"
-          placeholder="Email"
-          className="border p-2 w-full mb-3"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="border p-2 w-full mb-3"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button
-          type="submit"
-          className="bg-blue-600 text-white py-2 px-4 w-full rounded"
-        >
-          Login
-        </button>
-      </form>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex justify-center items-center space-x-2">
+          <div className="h-8 w-8 bg-blue-600 rounded-full"></div>
+          <h2 className="text-2xl font-bold text-gray-900">FindHusly</h2>
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Sign in to your account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Or{" "}
+          <span
+            onClick={() => navigate("/register")}
+            className="font-medium text-blue-600 hover:text-blue-500 cursor-pointer"
+          >
+            create a new account
+          </span>
+        </p>
+      </div>
+
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-6 shadow-lg rounded-xl sm:px-10">
+          <form onSubmit={handleLogin} className="space-y-6">
+            {/* EMAIL */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  name="email"
+                  type="text"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* PASSWORD */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  required
+                />
+              </div>
+            </div>
+
+
+            {/* SUBMIT BUTTON */}
+            <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+              >
+                Sign in
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

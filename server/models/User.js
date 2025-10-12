@@ -19,8 +19,8 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["User", "Agent"], // ✅ Only two valid roles
-    default: "User",
+    enum: ["user", "agent"], 
+    default: "user",
   },
   photo: {
     type: String,

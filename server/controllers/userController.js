@@ -6,8 +6,9 @@ import jwt from "jsonwebtoken";
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password, role, contact } = req.body;
+    const photo = req.file ? req.file.filename : null; // ✅ handle uploaded file
 
-    // Check if user exists
+    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser)
       return res.status(400).json({ message: "User already exists" });
@@ -15,12 +16,14 @@ export const registerUser = async (req, res) => {
     // ✅ Hash password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // ✅ Create user with photo field
     const newUser = new User({
       name,
       email,
-      password: hashedPassword, // ✅ store encrypted password
-      role,
+      password: hashedPassword,
+      role: role?.toLowerCase() || "user",
       contact,
+      photo, // ✅ store uploaded filename
     });
 
     await newUser.save();
@@ -68,7 +71,7 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         contact: user.contact,
-        role: user.role,
+        role: user.role.toLowerCase(), // ✅ correct
         photo: user.photo,
       },
     });
