@@ -7,21 +7,9 @@ import connectDB from "./config/mongoConnect.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import propertyRoutes from "./routes/propertyRoutes.js";
-import { SpeedInsights } from "@vercel/speed-insights"
+import agentRoutes from "./routes/agentRoutes.js";
 
-function App() {
-  return (
-    <div>
-      {/* Your app content */}
-      <SpeedInsights />
-    </div>
-  )
-}
-
-export default App
-
-
-
+// Configure dotenv to load environment variables
 dotenv.config();
 connectDB();
 // Express app initialization must come before using 'app'
@@ -30,12 +18,12 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors());
+app.use("/api/users", userRoutes);
+app.use("/api/agents", agentRoutes);
 
 // Static folder (for uploaded images)
 app.use("/uploads", express.static("uploads"));
 
-// Routes
-app.use("/api/users", userRoutes);
 app.use("/api/properties", propertyRoutes); 
 
 

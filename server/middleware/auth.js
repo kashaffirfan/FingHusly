@@ -1,6 +1,15 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+export const agentOnly = (req, res, next) => {
+  if (req.user && req.user.role && req.user.role.toLowerCase() === "agent") {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied: Agents only" });
+  }
+};
+
+
 // ✅ Middleware to protect routes
 export const protect = async (req, res, next) => {
   try {

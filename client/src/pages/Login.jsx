@@ -7,34 +7,42 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
+const handleLogin = async (e) => {
+  e.preventDefault();
 
-    try {
-      const res = await axios.post("http://localhost:5000/api/users/login", {
-        email,
-        password,
-      });
+  try {
+    const res = await fetch("http://localhost:5000/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const { user, token } = res.data;
+    const data = await res.json();
 
-      if (user) {
-        localStorage.setItem("activeUser", JSON.stringify(user));
-        localStorage.setItem("activeToken", token);
-        localStorage.setItem("activeRole", user.role);
-        const userRole = user?.role?.toLowerCase();
+    console.log("Response status:", res.status);
+    console.log("Response data:", data);
 
-        alert("Login successful!");
-        if (userRole === "user") navigate("/home");
-        else {
-          navigate("/agent");
-        }
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert(error.response?.data?.message || "Invalid credentials");
+    if (res.ok) {
+      alert("Login successful!");
+
+      localStorage.setItem("activeUser", JSON.stringify(data));
+      localStorage.setItem("activeToken", data.token);
+
+      const userRole = data?.role?.toLowerCase();
+      console.log("User role from response:", userRole);
+      console.log("Saved user:", JSON.parse(localStorage.getItem("activeUser")));
+
+      // Direct reload
+      window.location.href = userRole === "agent" ? "/agent" : "/home";
+    } else {
+      alert(data.message || "Invalid credentials");
     }
-  };
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Something went wrong");
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

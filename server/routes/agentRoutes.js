@@ -1,5 +1,5 @@
 import express from "express";
-import Agent from "../models/Agents.js";
+import Agent from "../models/Agent.js";
 import { protect, agentOnly } from "../middleware/auth.js";
 
 const router = express.Router();

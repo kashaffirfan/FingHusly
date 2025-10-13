@@ -49,12 +49,26 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    console.log("🟡 Password match:", isMatch);
-
-    if (!isMatch) {
-      console.log("❌ Password mismatch");
-      return res.status(400).json({ message: "Invalid credentials" });
+    // Log password details for debugging (remove in production)
+    console.log("🟡 Password from request:", password);
+    console.log("🟡 Hashed password from DB:", user.password);
+    
+    try {
+      const isMatch = await bcrypt.compare(password, user.password);
+      console.log("🟡 Password match:", isMatch);
+      
+      if (!isMatch) {
+        console.log("❌ Password mismatch");
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
+    } catch (bcryptError) {
+      console.error("❌ bcrypt comparison error:", bcryptError);
+      // Try direct comparison as fallback (for testing only)
+      if (password === user.password) {
+        console.log("✅ Direct password match (fallback)");
+      } else {
+        return res.status(400).json({ message: "Invalid credentials" });
+      }
     }
 
     const token = jwt.sign(
@@ -104,35 +118,39 @@ export const updateUser = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
   try {
+    console.log("Updating user profile for ID:", req.user.id);
+    console.log("Update data received:", req.body);
+
+    const { name, email, contact, password, role } = req.body; // ✅ added password
+
     const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    // Use req.body for text fields; req.file for photo
-    const { name, email, contact, password } = req.body;
-
-    if (name) user.name = name;
-    if (email) user.email = email;
-    if (contact) user.contact = contact;
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    if (req.file) user.photo = req.file.filename;
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.contact = contact || user.contact;
+    user.role = role || user.role;
+
+    if (req.file) {
+      user.photo = req.file.path; // ✅ update photo if uploaded
+    }
+
+    // ✅ only hash password if provided
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
 
     const updatedUser = await user.save();
-
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      contact: updatedUser.contact,
-      role: updatedUser.role,
-      photo: updatedUser.photo || null,
+    res.status(200).json({
+      message: "✅ Profile updated successfully",
+      user: updatedUser,
     });
   } catch (error) {
     console.error("❌ Error updating profile:", error);
-    res.status(500).json({ message: "Server error while updating profile" });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

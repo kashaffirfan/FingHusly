@@ -1,4 +1,4 @@
-import express from "express"; 
+import express from "express";
 import {
   registerUser,
   loginUser,
@@ -8,15 +8,14 @@ import {
   updateUserProfile,
   sendNotification,
 } from "../controllers/userController.js";
-import { protect } from "../middleware/auth.js"; 
-import { upload } from "../middleware/upload.js"; 
+import { protect } from "../middleware/auth.js";
+import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
 
 // Profile routes for logged-in User/Agent
 router.get("/profile", protect, getUserProfile);
-router.put("/profile", protect, updateUserProfile);
-router.put("/profile", protect, upload.single("photo"), updateUserProfile);
+router.put("/profile", protect, upload.single("photo"), updateUserProfile); // ✅ only this one
 
 // Register & Login
 router.post("/register", upload.single("photo"), registerUser);
