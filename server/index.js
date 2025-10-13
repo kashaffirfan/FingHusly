@@ -7,6 +7,19 @@ import connectDB from "./config/mongoConnect.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import propertyRoutes from "./routes/propertyRoutes.js";
+import { SpeedInsights } from "@vercel/speed-insights"
+
+function App() {
+  return (
+    <div>
+      {/* Your app content */}
+      <SpeedInsights />
+    </div>
+  )
+}
+
+export default App
+
 
 
 dotenv.config();

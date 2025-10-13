@@ -30,5 +30,6 @@ root.render(
       <Route path="/property/:id" element={<PropertyDetails />} /> 
       <Route path="/viewdetails/:id" element={<ViewDetails />} />
     </Routes>
+    <SpeedInsights />
   </BrowserRouter>
 );
